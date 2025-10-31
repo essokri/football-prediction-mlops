@@ -67,9 +67,10 @@ source .venv/bin/activate    # (Linux / Mac)
 ```
 
 ## Étapes actuelles implémentées
-Collecte automatique des données (SoccerData)
-Prétraitement et fusion des fichiers CSV
-Entraînement du modèle XGBoost avec MLflow
-Génération et évaluation des prédictions
-Suivi complet du pipeline avec DVC
-
+```
+- Collecte automatique des données (SoccerData)
+- Prétraitement et fusion des fichiers CSV
+- Entraînement du modèle XGBoost avec MLflow
+- Génération et évaluation des prédictions
+- Suivi complet du pipeline avec DVC
+```
