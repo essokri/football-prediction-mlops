@@ -1,0 +1,13 @@
+schema: '2.0'
+stages:
+  fetch_data:
+    cmd: python src/fetch_data.py
+    outs:
+    - path: data/raw/schedule_sample.csv
+      hash: md5
+      md5: ff13348e3ca5c338794a9ef765496ca1
+      size: 71227
+    - path: data/raw/team_stats_sample.csv
+      hash: md5
+      md5: eb44c0593b9f0360e48c0b0bf403a635
+      size: 4108

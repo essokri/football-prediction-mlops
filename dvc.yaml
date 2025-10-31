@@ -1,0 +1,6 @@
+stages:
+  fetch_data:
+    cmd: python src/fetch_data.py
+    outs:
+      - data/raw/schedule_sample.csv
+      - data/raw/team_stats_sample.csv
