@@ -1,6 +1,35 @@
 stages:
   fetch_data:
     cmd: python src/fetch_data.py
+    deps:
+      - src/fetch_data.py
     outs:
       - data/raw/schedule_sample.csv
       - data/raw/team_stats_sample.csv
+
+  preprocess:
+    cmd: python src/preprocess.py
+    deps:
+      - data/raw/schedule_sample.csv
+      - data/raw/team_stats_sample.csv
+      - src/preprocess.py
+    outs:
+      - data/processed/clean_matches.csv
+
+  train:
+    cmd: python src/train.py
+    deps:
+      - data/processed/clean_matches.csv
+      - src/train.py
+    outs:
+      - models/
+      
+  predict:
+    cmd: python src/predict.py
+    deps:
+      - src/predict.py
+      - models/home_model.json
+      - models/away_model.json
+      - data/processed/clean_matches.csv
+    outs:
+      - data/predictions/predicted_matches.csv

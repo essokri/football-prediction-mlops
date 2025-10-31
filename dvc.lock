@@ -2,6 +2,11 @@ schema: '2.0'
 stages:
   fetch_data:
     cmd: python src/fetch_data.py
+    deps:
+    - path: src/fetch_data.py
+      hash: md5
+      md5: a5b0b0932f5d07927fa02556e429ff77
+      size: 1012
     outs:
     - path: data/raw/schedule_sample.csv
       hash: md5
@@ -11,3 +16,64 @@ stages:
       hash: md5
       md5: eb44c0593b9f0360e48c0b0bf403a635
       size: 4108
+  preprocess:
+    cmd: python src/preprocess.py
+    deps:
+    - path: data/raw/schedule_sample.csv
+      hash: md5
+      md5: ff13348e3ca5c338794a9ef765496ca1
+      size: 71227
+    - path: data/raw/team_stats_sample.csv
+      hash: md5
+      md5: eb44c0593b9f0360e48c0b0bf403a635
+      size: 4108
+    - path: src/preprocess.py
+      hash: md5
+      md5: 92d616602c8716ce0164a3c1cf07439f
+      size: 1985
+    outs:
+    - path: data/processed/clean_matches.csv
+      hash: md5
+      md5: 1001c2e92a557f5d3de25c7ec6461cda
+      size: 75868
+  train:
+    cmd: python src/train.py
+    deps:
+    - path: data/processed/clean_matches.csv
+      hash: md5
+      md5: 1001c2e92a557f5d3de25c7ec6461cda
+      size: 75868
+    - path: src/train.py
+      hash: md5
+      md5: c85baf478bb39bab5bd9a5bcd33e6947
+      size: 3100
+    outs:
+    - path: models/
+      hash: md5
+      md5: d8bc36d2c18efa52fa5e1edd13d0966e.dir
+      size: 505833
+      nfiles: 2
+  predict:
+    cmd: python src/predict.py
+    deps:
+    - path: data/processed/clean_matches.csv
+      hash: md5
+      md5: 1001c2e92a557f5d3de25c7ec6461cda
+      size: 75868
+    - path: models/away_model.json
+      hash: md5
+      md5: 971b6dcd90386b9035c492bc66de1409
+      size: 253319
+    - path: models/home_model.json
+      hash: md5
+      md5: 49266c2886c1b643c73c14ec82929caf
+      size: 252514
+    - path: src/predict.py
+      hash: md5
+      md5: a766624f0f0f30c1a74c0068c39eea0a
+      size: 2818
+    outs:
+    - path: data/predictions/predicted_matches.csv
+      hash: md5
+      md5: d7ac7654d4a21b280baf919ce4b2e918
+      size: 83571

@@ -35,7 +35,7 @@ notebooks/
 .dvc/
 .dvc/cache/
 .dvc/tmp/
-*.lock
+#*.lock
 mlartifacts/
 
 # Docker and build
@@ -52,3 +52,4 @@ Thumbs.db
 reports/
 *.html
 *.pdf
+/models
