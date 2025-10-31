@@ -1,0 +1,25 @@
+# Core
+pandas
+numpy
+scikit-learn
+matplotlib
+seaborn
+
+# Data collection
+soccerdata
+requests
+beautifulsoup4
+
+# MLOps tools
+dvc
+mlflow
+evidently
+
+# API and deployment
+fastapi
+uvicorn
+pydantic
+
+# Utilities
+python-dotenv
+joblib
