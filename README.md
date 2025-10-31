@@ -7,7 +7,7 @@ Ce projet vise à construire un pipeline **MLOps complet** pour prédire le rés
 
 
 ##  Architecture du projet
-
+```
 football-prediction-mlops/
 │
 ├── data/
@@ -26,7 +26,7 @@ football-prediction-mlops/
 ├── dvc.lock # Suivi des versions des étapes DVC
 ├── requirements.txt # Dépendances du projet
 └── .gitignore
-
+```
 ---
 
 ## ⚙️ Installation et exécution
