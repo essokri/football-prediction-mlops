@@ -1,9 +1,10 @@
 #   Football Match Prediction — End-to-End MLOps Project
 
 ##  Objectif du projet
+
 Ce projet vise à construire un pipeline **MLOps complet** pour prédire le résultat d’un match de football (victoire, nul, défaite) à partir de données collectées automatiquement depuis **SoccerData** (FBref, Understat, etc.).
 .
----
+
 
 ##  Architecture du projet
 
