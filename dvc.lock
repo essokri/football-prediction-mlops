@@ -45,33 +45,33 @@ stages:
       size: 75868
     - path: src/train.py
       hash: md5
-      md5: c85baf478bb39bab5bd9a5bcd33e6947
-      size: 3100
+      md5: 2fb3c7a54fcb2fd0584e3e0080c30141
+      size: 3106
     outs:
     - path: models/
       hash: md5
-      md5: d8bc36d2c18efa52fa5e1edd13d0966e.dir
-      size: 505833
-      nfiles: 2
+      md5: d751713988987e9331980363e24189ce.dir
+      size: 0
+      nfiles: 0
   predict:
     cmd: python src/predict.py
     deps:
+    - path: app/model/away_model.json
+      hash: md5
+      md5: 971b6dcd90386b9035c492bc66de1409
+      size: 253319
+    - path: app/model/home_model.json
+      hash: md5
+      md5: 49266c2886c1b643c73c14ec82929caf
+      size: 252514
     - path: data/processed/clean_matches.csv
       hash: md5
       md5: 1001c2e92a557f5d3de25c7ec6461cda
       size: 75868
-    - path: models/away_model.json
-      hash: md5
-      md5: 971b6dcd90386b9035c492bc66de1409
-      size: 253319
-    - path: models/home_model.json
-      hash: md5
-      md5: 49266c2886c1b643c73c14ec82929caf
-      size: 252514
     - path: src/predict.py
       hash: md5
-      md5: a766624f0f0f30c1a74c0068c39eea0a
-      size: 2818
+      md5: eaefe95f190e5b71ad78999216e391f5
+      size: 2821
     outs:
     - path: data/predictions/predicted_matches.csv
       hash: md5

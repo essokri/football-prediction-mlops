@@ -28,8 +28,8 @@ stages:
     cmd: python src/predict.py
     deps:
       - src/predict.py
-      - models/home_model.json
-      - models/away_model.json
+      - app/model/home_model.json
+      - app/model/away_model.json
       - data/processed/clean_matches.csv
     outs:
       - data/predictions/predicted_matches.csv
