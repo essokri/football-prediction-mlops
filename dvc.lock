@@ -48,11 +48,14 @@ stages:
       md5: 2fb3c7a54fcb2fd0584e3e0080c30141
       size: 3106
     outs:
-    - path: models/
+    - path: app/model/away_model.json
       hash: md5
-      md5: d751713988987e9331980363e24189ce.dir
-      size: 0
-      nfiles: 0
+      md5: 971b6dcd90386b9035c492bc66de1409
+      size: 253319
+    - path: app/model/home_model.json
+      hash: md5
+      md5: 49266c2886c1b643c73c14ec82929caf
+      size: 252514
   predict:
     cmd: python src/predict.py
     deps:

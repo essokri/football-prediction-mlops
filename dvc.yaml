@@ -22,7 +22,8 @@ stages:
       - data/processed/clean_matches.csv
       - src/train.py
     outs:
-      - models/
+      - app/model/home_model.json
+      - app/model/away_model.json
       
   predict:
     cmd: python src/predict.py
