@@ -7,42 +7,62 @@ import mlflow.xgboost
 import os
 
 def main():
-    print("🚀 Démarrage de l’entraînement du modèle...")
+    print("🚀 Démarrage de l’entraînement des modèles XGBoost...")
 
     # 1️⃣ Charger les données prétraitées
     data_path = "data/processed/clean_matches.csv"
     data = pd.read_csv(data_path)
-    print(f"✅ Données chargées : {data.shape[0]} lignes, {data.shape[1]} colonnes")
+    print(f"✅ Données chargées : {data.shape[0]} matchs, {data.shape[1]} colonnes")
 
-    # 2️⃣ Sélection des features de base
-    if "home_goals" not in data.columns or "away_goals" not in data.columns:
-        raise ValueError("Les colonnes 'home_goals' et 'away_goals' sont nécessaires pour l'entraînement.")
+    # 2️⃣ Sélection des features numériques pertinentes
+    features = [
+        "home_matches_played", "home_goals_for", "home_goals_against", "home_goals_diff",
+        "away_matches_played", "away_goals_for", "away_goals_against", "away_goals_diff"
+    ]
 
-    X = data[["home_team", "away_team"]]  # on garde simple pour tester
+    for f in features:
+        if f not in data.columns:
+            raise ValueError(f"⚠️ La colonne '{f}' est manquante dans les données.")
+
+    X = data[features]
     y_home = data["home_goals"]
     y_away = data["away_goals"]
 
-    # Encodage catégoriel simple
-    X_encoded = pd.get_dummies(X, columns=["home_team", "away_team"])
+    # 3️⃣ Division train/test
+    X_train, X_test, y_home_train, y_home_test = train_test_split(
+        X, y_home, test_size=0.2, random_state=42
+    )
+    _, _, y_away_train, y_away_test = train_test_split(
+        X, y_away, test_size=0.2, random_state=42
+    )
 
-    # Division en train/test
-    X_train, X_test, y_home_train, y_home_test = train_test_split(X_encoded, y_home, test_size=0.2, random_state=42)
-    _, _, y_away_train, y_away_test = train_test_split(X_encoded, y_away, test_size=0.2, random_state=42)
-
-    # 3️⃣ Suivi MLflow
-    mlflow.set_experiment("football_prediction")
-    with mlflow.start_run(run_name="xgboost_basic"):
+    # 4️⃣ Configuration MLflow
+    mlflow.set_experiment("football_prediction_mlops")
+    with mlflow.start_run(run_name="xgboost_multi_leagues"):
         mlflow.log_param("model_type", "XGBRegressor")
+        mlflow.log_param("features", features)
         mlflow.log_param("test_size", 0.2)
 
-        # 4️⃣ Entraînement des modèles
-        model_home = xgb.XGBRegressor(objective="reg:squarederror", random_state=42)
-        model_away = xgb.XGBRegressor(objective="reg:squarederror", random_state=42)
+        # 5️⃣ Entraînement des modèles
+        model_home = xgb.XGBRegressor(
+            objective="reg:squarederror",
+            random_state=42,
+            n_estimators=100,
+            learning_rate=0.1,
+            max_depth=5
+        )
+        model_away = xgb.XGBRegressor(
+            objective="reg:squarederror",
+            random_state=42,
+            n_estimators=100,
+            learning_rate=0.1,
+            max_depth=5
+        )
 
         model_home.fit(X_train, y_home_train)
         model_away.fit(X_train, y_away_train)
 
-        # 5️⃣ Évaluation
+        # 6️⃣ Évaluation
         y_home_pred = model_home.predict(X_test)
         y_away_pred = model_away.predict(X_test)
 
@@ -60,9 +80,9 @@ def main():
 
         print("📊 Résultats du modèle :")
         for k, v in metrics.items():
-            print(f"{k}: {v:.3f}")
+            print(f"  {k}: {v:.4f}")
 
-        # 6️⃣ Sauvegarde du modèle
+        # 7️⃣ Sauvegarde des modèles
         os.makedirs("models", exist_ok=True)
         home_model_path = "models/home_model.json"
         away_model_path = "models/away_model.json"
