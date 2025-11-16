@@ -1,4 +1,8 @@
 stages:
+  # -------------------------
+  # MODEL 1 (TON ANCIEN)
+  # -------------------------
+
   fetch_data:
     cmd: python src/fetch_data_universal.py
     deps:
@@ -34,3 +38,61 @@ stages:
       - data/processed/clean_matches.csv
     outs:
       - data/predictions/predicted_matches.csv
+
+  # -------------------------
+  # MODEL 2 (TEAM STRENGTHS)
+  # -------------------------
+
+  preprocess_model2:
+    cmd: python src/preprocess_model2.py
+    deps:
+      - src/preprocess_model2.py
+      - data/raw/schedule_model2.csv
+      - data/raw/player_season_stats_model2.csv
+      - data/team_name_mapping.csv
+    outs:
+      - data/processed/model2_preprocessed.csv
+
+  train_model2:
+    cmd: python src/train_model2.py
+    deps:
+      - src/train_model2.py
+      - data/processed/model2_preprocessed.csv
+      - data/raw/team_stats_multi_leagues.csv
+      - data/raw/team_match_stats_model2.csv
+    outs:
+      - models/model2_xgb.json
+      - data/processed/model2_training_dataset.csv
+
+  predict_model2:
+    cmd: python src/predict_model2.py
+    deps:
+      - src/predict_model2.py
+      - models/model2_xgb.json
+      - data/processed/model2_training_dataset.csv
+    outs:
+      - data/predictions/model2_predictions.csv
+
+  # -------------------------
+  # MODEL 3 (PLAYER MODE)
+  # -------------------------
+
+  predict_model3_players:
+    cmd: python src/predict_model2_players.py
+    deps:
+      - src/predict_model2_players.py
+      - models/model2_xgb.json
+      - data/processed/player_strengths.csv
+      - data/raw/team_stats_multi_leagues.csv
+      - data/raw/team_match_stats_model2.csv
+    outs:
+      - data/predictions/model3_players_output.csv
+
+  data_drift:
+    cmd: python src/monitor_drift.py
+    deps:
+      - src/monitor_drift.py
+      - data/processed/clean_matches.csv
+    outs:
+      - reports/simple_data_drift_report.csv
+      - reports/simple_data_drift_report.html

@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 from xgboost import XGBClassifier
+import os
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -36,33 +37,18 @@ def load_artifacts():
 
 def build_input_features(df_train, home, away):
     """
-    We take the last known stats for both teams from the training dataset
+    We take the latest known stats for both teams
     """
 
-    # Get last row for each team (contains engineered features)
     home_row = df_train[df_train["home_team_clean"] == home].tail(1)
     away_row = df_train[df_train["away_team_clean"] == away].tail(1)
 
-    if home_row.empty and away_row.empty:
-        raise ValueError(f"Aucun historique trouvé pour {home} et {away}.")
-
     if home_row.empty:
-        raise ValueError(f"Aucun historique pour l'équipe domicile : {home}")
-
+        raise ValueError(f"No history found for HOME team: {home}")
     if away_row.empty:
-        raise ValueError(f"Aucun historique pour l'équipe extérieure : {away}")
+        raise ValueError(f"No history found for AWAY team: {away}")
 
-    # We only keep the columns used during training
-    feature_cols = [
-        "home_strength", "away_strength", "strength_diff",
-        "home_goals_for", "away_goals_for",
-        "home_goals_against", "away_goals_against",
-        "goals_for_diff", "goals_against_diff",
-        "matches_played_diff",
-        "home_xg", "away_xg",
-    ]
-
-    # Build feature row
+    # Build the row
     row = pd.DataFrame({
         "home_strength": home_row["home_strength"].values[0],
         "away_strength": away_row["away_strength"].values[0],
@@ -91,13 +77,6 @@ def build_input_features(df_train, home, away):
 # ----------------------------------------------------------
 
 def predict(model, features, home, away):
-    """
-    Model predicts class 0/1/2 corresponding to:
-    0 = away win
-    1 = draw
-    2 = home win
-    """
-
     proba = model.predict_proba(features)[0]
     pred = np.argmax(proba)
 
@@ -132,6 +111,23 @@ def main():
     print(f"  Draw     : {proba[1]:.3f}")
     print(f"  Home Win : {proba[2]:.3f}")
     print("==========================================\n")
+
+    # ----------------------------------------------------------
+    # DVC OUTPUT SAVE
+    # ----------------------------------------------------------
+    os.makedirs("data/predictions", exist_ok=True)
+    path = "data/predictions/model2_predictions.csv"
+
+    pd.DataFrame([{
+        "home_team": home,
+        "away_team": away,
+        "prediction": outcome,
+        "proba_away_win": proba[0],
+        "proba_draw": proba[1],
+        "proba_home_win": proba[2],
+    }]).to_csv(path, index=False)
+
+    print(f"📝 Saved to {path}")
 
 
 if __name__ == "__main__":

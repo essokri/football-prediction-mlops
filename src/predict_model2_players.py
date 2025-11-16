@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import xgboost as xgb
 from datetime import datetime
+import os
 
 MODEL_PATH = "models/model2_xgb.json"
 PLAYER_STRENGTH_PATH = "data/processed/player_strengths.csv"
@@ -10,6 +11,7 @@ MATCH_STATS_PATH = "data/raw/team_match_stats_model2.csv"
 
 def log(msg):
     print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {msg}")
+
 
 # --------------------------------------------------------------
 # TEAM SELECTION
@@ -27,6 +29,7 @@ def select_team(players_df, label):
         team = input(f"{label} team: ").strip()
 
     return team
+
 
 # --------------------------------------------------------------
 # PLAYER SELECTION (11 players)
@@ -52,6 +55,7 @@ def select_players(players_df, team):
     strength = team_players[team_players["player"].isin(selected)]["player_score"].mean()
     return strength
 
+
 # --------------------------------------------------------------
 # BUILD THE 12 FEATURES FOR THE MODEL
 # --------------------------------------------------------------
@@ -60,12 +64,11 @@ def build_features(home_team, away_team):
     team_stats = pd.read_csv(TEAM_STATS_PATH)
     match_stats = pd.read_csv(MATCH_STATS_PATH)
 
-    # Aggregate long-term stats
     def get_team_stats(team):
         row = team_stats[team_stats["team"] == team]
 
         if row.empty:
-            return 0, 0, 0, 0, 0, 0  # fallback
+            return 0, 0, 0, 0, 0, 0
 
         rf = row.iloc[0]
         return (
@@ -82,7 +85,8 @@ def build_features(home_team, away_team):
 
     def get_team_xg(team):
         df = match_stats[match_stats["opponent"] == team]
-        if df.empty: return 0
+        if df.empty:
+            return 0
         return df["xG"].mean()
 
     home_xg = get_team_xg(home_team)
@@ -99,6 +103,7 @@ def build_features(home_team, away_team):
         "home_xg": home_xg,
         "away_xg": away_xg,
     }
+
 
 # --------------------------------------------------------------
 # MAIN
@@ -125,7 +130,6 @@ def main():
 
     strength_diff = home_strength - away_strength
 
-    # Build 12-feature vector
     extra = build_features(home_team, away_team)
 
     X = pd.DataFrame([{
@@ -138,13 +142,34 @@ def main():
     y_pred = model.predict(X)[0]
     y_proba = model.predict_proba(X)[0]
 
-    print("\n=============== RESULT ===============")
     mapping = {0: "HOME WIN", 1: "DRAW", 2: "AWAY WIN"}
+
+    print("\n=============== RESULT ===============")
     print("Prediction:", mapping[y_pred])
     print("\nProbabilities:")
     print("  Home Win :", round(y_proba[0], 3))
     print("  Draw     :", round(y_proba[1], 3))
     print("  Away Win :", round(y_proba[2], 3))
+
+    # ----------------------------------------------------------
+    # SAVE OUTPUT FOR DVC (CSV)
+    # ----------------------------------------------------------
+    os.makedirs("data/predictions", exist_ok=True)
+    output_path = "data/predictions/model3_players_output.csv"
+
+    pd.DataFrame([{
+        "home_team": home_team,
+        "away_team": away_team,
+        "prediction": mapping[y_pred],
+        "proba_home_win": round(y_proba[0], 3),
+        "proba_draw": round(y_proba[1], 3),
+        "proba_away_win": round(y_proba[2], 3),
+        "home_strength": home_strength,
+        "away_strength": away_strength,
+        "strength_diff": strength_diff
+    }]).to_csv(output_path, index=False)
+
+    print(f"\n📝 Output saved to: {output_path}")
 
 
 if __name__ == "__main__":
