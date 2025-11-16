@@ -83,9 +83,9 @@ def main():
             print(f"  {k}: {v:.4f}")
 
         # 7️⃣ Sauvegarde des modèles
-        os.makedirs("models", exist_ok=True)
-        home_model_path = "models/home_model.json"
-        away_model_path = "models/away_model.json"
+        os.makedirs("app/models", exist_ok=True)
+        home_model_path = "app/models/home_model.json"
+        away_model_path = "app/models/away_model.json"
         model_home.save_model(home_model_path)
         model_away.save_model(away_model_path)
 

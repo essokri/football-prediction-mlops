@@ -1,82 +1,82 @@
 schema: '2.0'
 stages:
   fetch_data:
-    cmd: python src/fetch_data.py
+    cmd: python src/fetch_data_universal.py
     deps:
-    - path: src/fetch_data.py
+    - path: src/fetch_data_universal.py
       hash: md5
-      md5: a5b0b0932f5d07927fa02556e429ff77
-      size: 1012
+      md5: 839dbe3734760ee90b1830e17b54b2fd
+      size: 5451
     outs:
-    - path: data/raw/schedule_sample.csv
+    - path: data/raw/schedule_multi_leagues.csv
       hash: md5
-      md5: ff13348e3ca5c338794a9ef765496ca1
-      size: 71227
-    - path: data/raw/team_stats_sample.csv
+      md5: cb4f8590a6fc504c305ab79686b03320
+      size: 3141171
+    - path: data/raw/team_stats_multi_leagues.csv
       hash: md5
-      md5: eb44c0593b9f0360e48c0b0bf403a635
-      size: 4108
+      md5: f34c9f96be1224c335a54f13f6f929f1
+      size: 205023
   preprocess:
     cmd: python src/preprocess.py
     deps:
-    - path: data/raw/schedule_sample.csv
+    - path: data/raw/schedule_multi_leagues.csv
       hash: md5
-      md5: ff13348e3ca5c338794a9ef765496ca1
-      size: 71227
-    - path: data/raw/team_stats_sample.csv
+      md5: cb4f8590a6fc504c305ab79686b03320
+      size: 3141171
+    - path: data/raw/team_stats_multi_leagues.csv
       hash: md5
-      md5: eb44c0593b9f0360e48c0b0bf403a635
-      size: 4108
+      md5: f34c9f96be1224c335a54f13f6f929f1
+      size: 205023
     - path: src/preprocess.py
       hash: md5
-      md5: 92d616602c8716ce0164a3c1cf07439f
-      size: 1985
+      md5: ded8e97a55ed0857d5c6d5eccb95214d
+      size: 3185
     outs:
     - path: data/processed/clean_matches.csv
       hash: md5
-      md5: 1001c2e92a557f5d3de25c7ec6461cda
-      size: 75868
+      md5: 1391a5b21fbaaafbe64166feadc7e3fc
+      size: 11343280
   train:
     cmd: python src/train.py
     deps:
     - path: data/processed/clean_matches.csv
       hash: md5
-      md5: 1001c2e92a557f5d3de25c7ec6461cda
-      size: 75868
+      md5: 1391a5b21fbaaafbe64166feadc7e3fc
+      size: 11343280
     - path: src/train.py
       hash: md5
-      md5: 2fb3c7a54fcb2fd0584e3e0080c30141
-      size: 3106
+      md5: 5fd1ca86841de0ba6546543efccd842b
+      size: 3497
     outs:
-    - path: app/model/away_model.json
+    - path: app/models/away_model.json
       hash: md5
-      md5: 971b6dcd90386b9035c492bc66de1409
-      size: 253319
-    - path: app/model/home_model.json
+      md5: a26e456318de9ae5832919fec5ba822e
+      size: 336227
+    - path: app/models/home_model.json
       hash: md5
-      md5: 49266c2886c1b643c73c14ec82929caf
-      size: 252514
+      md5: e730e3dcc6191a8a2eb1beb562879f5f
+      size: 338569
   predict:
     cmd: python src/predict.py
     deps:
-    - path: app/model/away_model.json
+    - path: app/models/away_model.json
       hash: md5
-      md5: 971b6dcd90386b9035c492bc66de1409
-      size: 253319
-    - path: app/model/home_model.json
+      md5: a26e456318de9ae5832919fec5ba822e
+      size: 336227
+    - path: app/models/home_model.json
       hash: md5
-      md5: 49266c2886c1b643c73c14ec82929caf
-      size: 252514
+      md5: e730e3dcc6191a8a2eb1beb562879f5f
+      size: 338569
     - path: data/processed/clean_matches.csv
       hash: md5
-      md5: 1001c2e92a557f5d3de25c7ec6461cda
-      size: 75868
+      md5: 1391a5b21fbaaafbe64166feadc7e3fc
+      size: 11343280
     - path: src/predict.py
       hash: md5
-      md5: eaefe95f190e5b71ad78999216e391f5
-      size: 2821
+      md5: b54548e2dcc4fdb3f0993ca26742db8f
+      size: 3112
     outs:
     - path: data/predictions/predicted_matches.csv
       hash: md5
-      md5: d7ac7654d4a21b280baf919ce4b2e918
-      size: 83571
+      md5: 60b4d47a75a6b5154474c4c812f1a767
+      size: 12928212

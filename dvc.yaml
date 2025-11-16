@@ -1,17 +1,17 @@
 stages:
   fetch_data:
-    cmd: python src/fetch_data.py
+    cmd: python src/fetch_data_universal.py
     deps:
-      - src/fetch_data.py
+      - src/fetch_data_universal.py
     outs:
-      - data/raw/schedule_sample.csv
-      - data/raw/team_stats_sample.csv
+      - data/raw/schedule_multi_leagues.csv
+      - data/raw/team_stats_multi_leagues.csv
 
   preprocess:
     cmd: python src/preprocess.py
     deps:
-      - data/raw/schedule_sample.csv
-      - data/raw/team_stats_sample.csv
+      - data/raw/schedule_multi_leagues.csv
+      - data/raw/team_stats_multi_leagues.csv
       - src/preprocess.py
     outs:
       - data/processed/clean_matches.csv
@@ -22,15 +22,15 @@ stages:
       - data/processed/clean_matches.csv
       - src/train.py
     outs:
-      - app/model/home_model.json
-      - app/model/away_model.json
-      
+      - app/models/home_model.json
+      - app/models/away_model.json
+
   predict:
     cmd: python src/predict.py
     deps:
       - src/predict.py
-      - app/model/home_model.json
-      - app/model/away_model.json
+      - app/models/home_model.json
+      - app/models/away_model.json
       - data/processed/clean_matches.csv
     outs:
       - data/predictions/predicted_matches.csv
