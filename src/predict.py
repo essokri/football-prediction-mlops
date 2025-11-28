@@ -8,7 +8,7 @@ def main():
     print("🔮 Début des prédictions...")
 
     processed_path = "data/processed"
-    model_path = "models"
+    model_path = "app/models"
     pred_path = "data/predictions"
     os.makedirs(pred_path, exist_ok=True)
 

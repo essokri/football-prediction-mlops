@@ -73,8 +73,8 @@ stages:
       size: 11343280
     - path: src/predict.py
       hash: md5
-      md5: b54548e2dcc4fdb3f0993ca26742db8f
-      size: 3112
+      md5: 20fb092271fccd9f35803181b32d1063
+      size: 3116
     outs:
     - path: data/predictions/predicted_matches.csv
       hash: md5
@@ -109,8 +109,8 @@ stages:
       size: 1372856
     - path: data/raw/schedule_model2.csv
       hash: md5
-      md5: f9c69424429e2bf401f5d20469be5749
-      size: 832005
+      md5: d81bae3a6915e2848547a29964b4e691
+      size: 837197
     - path: data/team_name_mapping.csv
       hash: md5
       md5: 1d332bc89bb3c15cb9c3f972d8098793
@@ -122,23 +122,23 @@ stages:
     outs:
     - path: data/processed/model2_preprocessed.csv
       hash: md5
-      md5: 89051b054dcd153f891c05e6359ae6fd
-      size: 1343162
+      md5: c03dc419786d5d07fff8a82d910c9a6d
+      size: 1348901
   train_model2:
     cmd: python src/train_model2.py
     deps:
     - path: data/processed/model2_preprocessed.csv
       hash: md5
-      md5: 89051b054dcd153f891c05e6359ae6fd
-      size: 1343162
+      md5: c03dc419786d5d07fff8a82d910c9a6d
+      size: 1348901
     - path: data/raw/team_match_stats_model2.csv
       hash: md5
-      md5: daa0f9abc28e218a7d6bb6a65e1d9cc0
-      size: 2239574
-    - path: data/raw/team_stats_multi_leagues.csv
+      md5: 01c582d4da6c3bbba0c8cfe2b70f9e39
+      size: 2261729
+    - path: data/raw/team_season_stats_model2.csv
       hash: md5
-      md5: f34c9f96be1224c335a54f13f6f929f1
-      size: 205023
+      md5: c0425b801d652fde9c3927e7a7e123b2
+      size: 53934
     - path: src/train_model2.py
       hash: md5
       md5: 4c64c6ee63bf6c23281b9e7bb46ed479
@@ -146,23 +146,23 @@ stages:
     outs:
     - path: data/processed/model2_training_dataset.csv
       hash: md5
-      md5: 953ca7d6b15b5947d26cabac3b97625d
-      size: 365189480
+      md5: 2db0614eeb466def48bfd85c36ca3c30
+      size: 369336897
     - path: models/model2_xgb.json
       hash: md5
-      md5: de82fa2e5d0e70feaee0b944abef139d
-      size: 7114507
+      md5: d340a151aad9f2fe8aafc27853612d22
+      size: 7129739
   predict_model2:
     cmd: python src/predict_model2.py
     deps:
     - path: data/processed/model2_training_dataset.csv
       hash: md5
-      md5: 953ca7d6b15b5947d26cabac3b97625d
-      size: 365189480
+      md5: 2db0614eeb466def48bfd85c36ca3c30
+      size: 369336897
     - path: models/model2_xgb.json
       hash: md5
-      md5: de82fa2e5d0e70feaee0b944abef139d
-      size: 7114507
+      md5: d340a151aad9f2fe8aafc27853612d22
+      size: 7129739
     - path: src/predict_model2.py
       hash: md5
       md5: 40602c05fbd7504841b06ff78ca67272
@@ -170,8 +170,8 @@ stages:
     outs:
     - path: data/predictions/model2_predictions.csv
       hash: md5
-      md5: 1286083ae0d89757e09b33d120f1ad41
-      size: 136
+      md5: 4436740f868adfb3c4949c4fb6c0835f
+      size: 150
   predict_model3_players:
     cmd: python src/predict_model2_players.py
     deps:
@@ -181,16 +181,16 @@ stages:
       size: 409517
     - path: data/raw/team_match_stats_model2.csv
       hash: md5
-      md5: daa0f9abc28e218a7d6bb6a65e1d9cc0
-      size: 2239574
-    - path: data/raw/team_stats_multi_leagues.csv
+      md5: 01c582d4da6c3bbba0c8cfe2b70f9e39
+      size: 2261729
+    - path: data/raw/team_season_stats_model2.csv
       hash: md5
-      md5: f34c9f96be1224c335a54f13f6f929f1
-      size: 205023
+      md5: c0425b801d652fde9c3927e7a7e123b2
+      size: 53934
     - path: models/model2_xgb.json
       hash: md5
-      md5: de82fa2e5d0e70feaee0b944abef139d
-      size: 7114507
+      md5: d340a151aad9f2fe8aafc27853612d22
+      size: 7129739
     - path: src/predict_model2_players.py
       hash: md5
       md5: 91eb21b60ebf57ae2a31c8ae4cb811c2
@@ -198,7 +198,7 @@ stages:
     outs:
     - path: data/predictions/model3_players_output.csv
       hash: md5
-      md5: c450fbbccee550e131638dc1c41b0ec5
+      md5: 01700ea929df4bca832753c74b2421c4
       size: 222
   data_drift:
     cmd: python src/monitor_drift.py
@@ -207,16 +207,81 @@ stages:
       hash: md5
       md5: 1391a5b21fbaaafbe64166feadc7e3fc
       size: 11343280
+    - path: data/processed/player_strengths.csv
+      hash: md5
+      md5: 61d47f82d24a8135d97efa48362b0a10
+      size: 409517
+    - path: data/raw/team_match_stats_model2.csv
+      hash: md5
+      md5: 01c582d4da6c3bbba0c8cfe2b70f9e39
+      size: 2261729
+    - path: data/raw/team_season_stats_model2.csv
+      hash: md5
+      md5: c0425b801d652fde9c3927e7a7e123b2
+      size: 53934
     - path: src/monitor_drift.py
       hash: md5
-      md5: 374b3d869e14012907d8deb545483dd3
-      size: 4250
+      md5: 837458d5cb8443f34de6b77d04590248
+      size: 5105
     outs:
-    - path: reports/simple_data_drift_report.csv
+    - path: reports/
       hash: md5
-      md5: f253816af59d3302496e46b7efc9db90
-      size: 861
-    - path: reports/simple_data_drift_report.html
+      md5: 14e0a87ab099c09c144fefb3eb9d79d8.dir
+      size: 7347
+      nfiles: 8
+  extract_matches_model2:
+    cmd: python -m src.data_extraction.extract_matches
+    deps:
+    - path: src/data_extraction/extract_matches.py
       hash: md5
-      md5: d62642e7f7ffb8821146aaa576dad35d
-      size: 3516
+      md5: b6fb9d092b924e05a1be1b6e9650689c
+      size: 500
+    outs:
+    - path: data/raw/schedule_model2.csv
+      hash: md5
+      md5: d81bae3a6915e2848547a29964b4e691
+      size: 837197
+  extract_player_stats_model2:
+    cmd: python -m src.data_extraction.extract_player_stats
+    deps:
+    - path: src/data_extraction/extract_player_stats.py
+      hash: md5
+      md5: 906faa8a10ace9a30758bb44b7c40d64
+      size: 909
+    outs:
+    - path: data/raw/player_season_stats_model2.csv
+      hash: md5
+      md5: 979567df55a9eeaee26a3776682dabab
+      size: 1372856
+  extract_team_stats_model2:
+    cmd: python -m src.data_extraction.extract_team_stats
+    deps:
+    - path: src/data_extraction/extract_team_stats.py
+      hash: md5
+      md5: f572f1b0477a890dd7cdb40b527e39aa
+      size: 610
+    outs:
+    - path: data/raw/team_match_stats_model2.csv
+      hash: md5
+      md5: 01c582d4da6c3bbba0c8cfe2b70f9e39
+      size: 2261729
+    - path: data/raw/team_season_stats_model2.csv
+      hash: md5
+      md5: c0425b801d652fde9c3927e7a7e123b2
+      size: 53934
+  build_player_strengths:
+    cmd: python src/build_player_strengths.py
+    deps:
+    - path: data/raw/player_season_stats_model2.csv
+      hash: md5
+      md5: 979567df55a9eeaee26a3776682dabab
+      size: 1372856
+    - path: src/build_player_strengths.py
+      hash: md5
+      md5: 82f4fb3fe2f1288acae2d626d27b1706
+      size: 1424
+    outs:
+    - path: data/processed/player_strengths.csv
+      hash: md5
+      md5: 61d47f82d24a8135d97efa48362b0a10
+      size: 409517
