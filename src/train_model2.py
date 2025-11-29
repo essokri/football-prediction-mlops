@@ -4,40 +4,42 @@ import numpy as np
 from datetime import datetime
 
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, f1_score
+from sklearn.metrics import (
+    accuracy_score, 
+    f1_score,
+    mean_squared_error,
+    mean_absolute_error,
+    r2_score
+)
 from xgboost import XGBClassifier
 
-# -------------------------------------------------------------------
-# UTILS
-# -------------------------------------------------------------------
 
+# ---------------------------------------------------------------
+# UTILS
+# ---------------------------------------------------------------
 def log(msg: str):
     now = datetime.now().strftime("[%Y-%m-%d %H:%M:%S]")
     print(f"{now} {msg}")
 
 
-# -------------------------------------------------------------------
+# ---------------------------------------------------------------
 # LOAD DATA
-# -------------------------------------------------------------------
-
+# ---------------------------------------------------------------
 def load_data():
     log("Loading datasets...")
 
     pre = pd.read_csv("data/processed/model2_preprocessed.csv")
     team_stats = pd.read_csv("data/raw/team_stats_multi_leagues.csv")
-    match_stats = pd.read_csv("data/raw/team_match_stats_model2.csv")
 
     log(f"Preprocessed: {pre.shape}")
     log(f"Team stats: {team_stats.shape}")
-    log(f"Match stats: {match_stats.shape}")
 
-    return pre, team_stats, match_stats
+    return pre, team_stats
 
 
-# -------------------------------------------------------------------
+# ---------------------------------------------------------------
 # FEATURE ENGINEERING
-# -------------------------------------------------------------------
-
+# ---------------------------------------------------------------
 def create_features(pre, team_stats):
     log("Creating team long-term features...")
 
@@ -61,14 +63,13 @@ def create_features(pre, team_stats):
     return pre
 
 
-# -------------------------------------------------------------------
+# ---------------------------------------------------------------
 # FINAL FEATURES
-# -------------------------------------------------------------------
-
+# ---------------------------------------------------------------
 def select_model_features(df):
     log("Selecting features...")
 
-    f = [
+    features = [
         "home_strength", "away_strength", "strength_diff",
         "home_goals_for", "away_goals_for",
         "home_goals_against", "away_goals_against",
@@ -77,17 +78,35 @@ def select_model_features(df):
         "home_xg", "away_xg",
     ]
 
-    f = [c for c in f if c in df.columns]
+    features = [c for c in features if c in df.columns]
 
-    log(f"Using {len(f)} features")
-    return df[f], df["result"]
+    log(f"Using {len(features)} features")
+
+    return df[features], df["result"]
 
 
-# -------------------------------------------------------------------
-# TRAIN MODEL
-# -------------------------------------------------------------------
+# ---------------------------------------------------------------
+# MAIN TRAINING PIPELINE
+# ---------------------------------------------------------------
+def main():
+    pre, team_stats = load_data()
 
-def train_xgb(X_train, y_train):
+    df = create_features(pre, team_stats)
+
+    df = df[df["result"].notna()]  # remove empty
+
+    # -1,0,1  → 0,1,2
+    df["result_xgb"] = df["result"].replace({-1: 0, 0: 1, 1: 2}).astype(int)
+
+    X, y = select_model_features(df)
+    y = df["result_xgb"]
+
+    log("Splitting dataset...")
+
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42
+    )
+
     log("Training XGBoost...")
 
     model = XGBClassifier(
@@ -102,56 +121,45 @@ def train_xgb(X_train, y_train):
     )
 
     model.fit(X_train, y_train)
-    return model
-
-
-# -------------------------------------------------------------------
-# MAIN
-# -------------------------------------------------------------------
-
-def main():
-    pre, team_stats, match_stats = load_data()
-
-    df = create_features(pre, team_stats)
-
-    # Remove rows without target
-    df = df[df["result"].notna()]
-
-    # ------------------------------
-    # FIX CLASS LABELS FOR XGBOOST
-    # XGBoost expects 0,1,2
-    # Your labels = -1,0,1
-    # ------------------------------
-    df["result_xgb"] = df["result"].replace({
-        -1: 0,
-        0: 1,
-        1: 2
-    })
-
-    X, y = select_model_features(df)
-    y = df["result_xgb"]
-
-    log("Splitting dataset...")
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42, shuffle=True
-    )
-
-    model = train_xgb(X_train, y_train)
 
     log("Evaluating...")
-    y_pred = model.predict(X_test)
 
-    acc = accuracy_score(y_test, y_pred)
+    y_pred = model.predict(X_test)
+    y_proba = model.predict_proba(X_test)  # needed for metrics
+
+    # CLASSIFICATION METRICS
+    accuracy = accuracy_score(y_test, y_pred)
     f1 = f1_score(y_test, y_pred, average="macro")
 
-    log(f"Accuracy: {acc:.4f}")
-    log(f"F1 Score: {f1:.4f}")
+    # TURN PROBA INTO TRUE ONE-HOT
+    y_true = np.zeros_like(y_proba)
+    for i, cls in enumerate(y_test):
+        y_true[i, cls] = 1.0
 
+    # MSE / MAE / R2 for HOME (class 0) and AWAY (class 2)
+    mse_home = mean_squared_error(y_true[:, 0], y_proba[:, 0])
+    mae_home = mean_absolute_error(y_true[:, 0], y_proba[:, 0])
+    r2_home = r2_score(y_true[:, 0], y_proba[:, 0])
+
+    mse_away = mean_squared_error(y_true[:, 2], y_proba[:, 2])
+    mae_away = mean_absolute_error(y_true[:, 2], y_proba[:, 2])
+    r2_away = r2_score(y_true[:, 2], y_proba[:, 2])
+
+    print("📊 METRICS (Model 2) :")
+    print(f"  Accuracy:  {accuracy:.4f}")
+    print(f"  F1 Score:  {f1:.4f}")
+    print(f"  mse_home:  {mse_home:.4f}")
+    print(f"  mae_home:  {mae_home:.4f}")
+    print(f"  r2_home:   {r2_home:.4f}")
+    print(f"  mse_away:  {mse_away:.4f}")
+    print(f"  mae_away:  {mae_away:.4f}")
+    print(f"  r2_away:   {r2_away:.4f}")
+
+    # SAVE FILES
     os.makedirs("models", exist_ok=True)
     model.save_model("models/model2_xgb.json")
     log("Saved model → models/model2_xgb.json")
 
-    os.makedirs("data/processed", exist_ok=True)
     df.to_csv("data/processed/model2_training_dataset.csv", index=False)
     log("Saved dataset → data/processed/model2_training_dataset.csv")
 

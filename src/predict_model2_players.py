@@ -3,6 +3,7 @@ import numpy as np
 import xgboost as xgb
 from datetime import datetime
 import os
+from sklearn.metrics import accuracy_score, f1_score, mean_squared_error, mean_absolute_error, r2_score
 
 MODEL_PATH = "models/model2_xgb.json"
 PLAYER_STRENGTH_PATH = "data/processed/player_strengths.csv"
@@ -150,6 +151,52 @@ def main():
     print("  Home Win :", round(y_proba[0], 3))
     print("  Draw     :", round(y_proba[1], 3))
     print("  Away Win :", round(y_proba[2], 3))
+
+    # ----------------------------------------------------------
+    # METRICS LIKE MODEL 1 + MODEL2
+    # ----------------------------------------------------------
+
+    df_train = pd.read_csv("data/processed/model2_training_dataset.csv")
+
+    y_true = df_train["result_xgb"]
+    X_all = df_train[[
+        "home_strength", "away_strength", "strength_diff",
+        "home_goals_for", "away_goals_for",
+        "home_goals_against", "away_goals_against",
+        "goals_for_diff", "goals_against_diff",
+        "matches_played_diff",
+        "home_xg", "away_xg"
+    ]]
+
+    y_pred_all = model.predict(X_all)
+
+    acc = accuracy_score(y_true, y_pred_all)
+    f1 = f1_score(y_true, y_pred_all, average="macro")
+
+    mse_home = mean_squared_error([1 if y==2 else 0 for y in y_true],
+                                  [p[2] for p in model.predict_proba(X_all)])
+    mae_home = mean_absolute_error([1 if y==2 else 0 for y in y_true],
+                                   [p[2] for p in model.predict_proba(X_all)])
+    r2_home = r2_score([1 if y==2 else 0 for y in y_true],
+                       [p[2] for p in model.predict_proba(X_all)])
+
+    mse_away = mean_squared_error([1 if y==0 else 0 for y in y_true],
+                                  [p[0] for p in model.predict_proba(X_all)])
+    mae_away = mean_absolute_error([1 if y==0 else 0 for y in y_true],
+                                   [p[0] for p in model.predict_proba(X_all)])
+    r2_away = r2_score([1 if y==0 else 0 for y in y_true],
+                       [p[0] for p in model.predict_proba(X_all)])
+
+    print("\n📊 === MODEL 3 (PLAYER MODE) METRICS ===")
+    print(f"Accuracy : {acc:.4f}")
+    print(f"F1 Score : {f1:.4f}")
+    print(f"MSE Home : {mse_home:.4f}")
+    print(f"MAE Home : {mae_home:.4f}")
+    print(f"R2 Home  : {r2_home:.4f}")
+    print(f"MSE Away : {mse_away:.4f}")
+    print(f"MAE Away : {mae_away:.4f}")
+    print(f"R2 Away  : {r2_away:.4f}")
+    print("==========================================\n")
 
     # ----------------------------------------------------------
     # SAVE OUTPUT FOR DVC (CSV)
